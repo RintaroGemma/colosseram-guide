@@ -27,6 +27,11 @@ button.card{border:1px solid var(--line);background:var(--card);border-radius:16
 .controls{display:flex;gap:8px}.controls button{flex:1;border:0;border-radius:11px;padding:11px;background:#343434;color:white;font-weight:700}.controls .play{background:#9a6837}
 .small{font-size:11px;color:#aaa;margin-top:7px}
 .settings{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px}
+.transcript{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 2px 8px #00000008}
+.transcript h2{font-size:16px;margin:0 0 8px}
+.transcript-meta{font-size:12px;color:var(--accent);font-weight:700;margin-bottom:10px}
+.transcript p{font-size:15px;line-height:1.9;margin:0;white-space:pre-wrap}
+.transcript .hint{font-size:11px;color:var(--muted);margin-top:10px}
 label{font-size:12px;color:var(--muted)} select{width:100%;padding:9px;margin-top:5px;border-radius:9px;border:1px solid var(--line);background:white}
 @media(min-width:600px){.grid{grid-template-columns:repeat(3,1fr)}}
 </style>
@@ -36,6 +41,12 @@ label{font-size:12px;color:var(--muted)} select{width:100%;padding:9px;margin-to
 <main>
 <div class="notice"><b>使い方</b><br>今いる場所、または興味のあるスポットをタップしてください。「▶ 再生」で日本語ナレーションが流れます。イヤホン推奨。<br><small>※この試作版はスマートフォン標準の音声読み上げを利用します。</small></div>
 <div id="content"></div>
+<div class="transcript" id="transcriptBox">
+<h2 id="transcriptTitle">原稿</h2>
+<div class="transcript-meta" id="transcriptMeta">スポットを選択してください</div>
+<p id="transcriptText"></p>
+<div class="hint">音声を聞きながら、同じ内容を文字でも確認できます。</div>
+</div>
 <div class="settings">
 <button id="installBtn" style="display:none;width:100%;padding:11px;border:0;border-radius:10px;background:#8a5a2b;color:white;font-weight:700;margin-bottom:12px">📱 ホーム画面に追加</button>
 <label for="rate">ナレーション速度</label>
@@ -87,7 +98,7 @@ flat.forEach(group=>{
   group.items.forEach((x)=>{
     const idx=flatIndex(group.section,x[0]);
     const b=document.createElement('button'); b.className='card'; b.dataset.idx=idx;
-    b.innerHTML=`<div class="num">${x[0]}</div><div class="title">${x[1]}</div><div class="time">約1〜2分　タップして再生</div>`;
+    b.innerHTML=`<div class="num">${x[0]}</div><div class="title">${x[1]}</div><div class="time">約1〜2分　音声＋原稿</div>`;
     b.onclick=()=>select(idx,true); grid.appendChild(b);
   });
   content.appendChild(grid);
@@ -97,7 +108,20 @@ function flatIndex(section,num){
   for(const g of flat){for(const x of g.items){if(g.section===section&&x[0]===num)return n;n++;}}
 }
 function getItem(i){let n=0;for(const g of flat)for(const x of g.items){if(n++===i)return {...x,section:g.section};}}
-function select(i,scroll=false){current=i; const x=getItem(i); document.querySelectorAll('.card').forEach(b=>b.classList.toggle('active',+b.dataset.idx===i)); document.getElementById('now').textContent=`${x[0]}　${x[1]}`; document.getElementById('status').textContent=x.section; document.getElementById('play').textContent='▶ 再生'; speaking=false; if(scroll) document.querySelector(`.card[data-idx="${i}"]`).scrollIntoView({behavior:'smooth',block:'center'});}
+function select(i,scroll=false){
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  current=i;
+  const x=getItem(i);
+  document.querySelectorAll('.card').forEach(b=>b.classList.toggle('active',+b.dataset.idx===i));
+  document.getElementById('now').textContent=`${x[0]}　${x[1]}`;
+  document.getElementById('status').textContent=x.section;
+  document.getElementById('play').textContent='▶ 再生';
+  document.getElementById('transcriptTitle').textContent=`${x[0]}　${x[1]}`;
+  document.getElementById('transcriptMeta').textContent=x.section;
+  document.getElementById('transcriptText').textContent=x[2];
+  speaking=false;
+  if(scroll) document.querySelector(`.card[data-idx="${i}"]`).scrollIntoView({behavior:'smooth',block:'center'});
+}
 function speak(){
  if(!('speechSynthesis' in window)){alert('このブラウザでは音声読み上げが利用できません。');return;}
  speechSynthesis.cancel(); const x=getItem(current); const u=new SpeechSynthesisUtterance(x[2]); u.lang='ja-JP'; u.rate=parseFloat(document.getElementById('rate').value);
