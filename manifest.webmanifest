@@ -1,0 +1,18 @@
+{
+  "name": "コロッセオ 日本語音声ガイド",
+  "short_name": "Colosseo Guide",
+  "description": "コロッセオ・フォロ・ロマーノ・パラティーノの日本語音声ガイド",
+  "lang": "ja",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f2ec",
+  "theme_color": "#171717",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<rect width="512" height="512" rx="96" fill="#171717"/>
+<ellipse cx="256" cy="275" rx="160" ry="105" fill="none" stroke="#d8c3a5" stroke-width="28"/>
+<path d="M96 275V190c0-68 72-120 160-120s160 52 160 120v85" fill="none" stroke="#d8c3a5" stroke-width="28"/>
+<path d="M126 248v-55m62 55v-78m68 78v-92m68 92v-78m62 78v-55" stroke="#d8c3a5" stroke-width="22"/>
+<text x="256" y="390" text-anchor="middle" font-family="sans-serif" font-size="52" font-weight="700" fill="#fff">ROMA</text>
+</svg>

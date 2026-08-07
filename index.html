@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#171717">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Colosseo Guide">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>コロッセオ 日本語音声ガイド</title>
+<style>
+:root{--bg:#f5f2ec;--card:#fff;--ink:#202020;--muted:#716d65;--accent:#8a5a2b;--line:#e5dfd5}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Hiragino Sans",sans-serif}
+header{background:#171717;color:white;padding:22px 18px 18px;position:sticky;top:0;z-index:5}
+h1{font-size:21px;margin:0 0 5px}.sub{font-size:12px;color:#c9c5bd}
+main{max-width:760px;margin:auto;padding:16px 14px 120px}
+.notice{background:#efe6d8;border:1px solid #dfcfba;border-radius:14px;padding:13px 14px;margin-bottom:16px;font-size:13px;line-height:1.6}
+.section-title{font-size:14px;font-weight:700;margin:20px 4px 10px;color:#5d5145}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+button.card{border:1px solid var(--line);background:var(--card);border-radius:16px;padding:15px;text-align:left;min-height:105px;box-shadow:0 2px 8px #00000008;color:var(--ink)}
+.card .num{font-size:12px;color:var(--accent);font-weight:800}.card .title{font-size:16px;font-weight:700;margin-top:5px}.card .time{font-size:11px;color:var(--muted);margin-top:7px}
+.card.active{outline:2px solid var(--accent);background:#fffaf4}
+.player{position:fixed;bottom:0;left:0;right:0;background:#171717;color:white;padding:11px 14px calc(11px + env(safe-area-inset-bottom));z-index:10}
+.player-inner{max-width:760px;margin:auto}.now{font-size:12px;color:#d9d4cb;margin-bottom:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.controls{display:flex;gap:8px}.controls button{flex:1;border:0;border-radius:11px;padding:11px;background:#343434;color:white;font-weight:700}.controls .play{background:#9a6837}
+.small{font-size:11px;color:#aaa;margin-top:7px}
+.settings{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px}
+label{font-size:12px;color:var(--muted)} select{width:100%;padding:9px;margin-top:5px;border-radius:9px;border:1px solid var(--line);background:white}
+@media(min-width:600px){.grid{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<header><h1>🏛 コロッセオ 日本語音声ガイド</h1><div class="sub">タップして聞く・自分のペースで巡る</div></header>
+<main>
+<div class="notice"><b>使い方</b><br>今いる場所、または興味のあるスポットをタップしてください。「▶ 再生」で日本語ナレーションが流れます。イヤホン推奨。<br><small>※この試作版はスマートフォン標準の音声読み上げを利用します。</small></div>
+<div id="content"></div>
+<div class="settings">
+<button id="installBtn" style="display:none;width:100%;padding:11px;border:0;border-radius:10px;background:#8a5a2b;color:white;font-weight:700;margin-bottom:12px">📱 ホーム画面に追加</button>
+<label for="rate">ナレーション速度</label>
+<select id="rate"><option value="0.9">ゆっくり</option><option value="1" selected>標準</option><option value="1.1">少し速め</option></select>
+</div>
+</main>
+<div class="player"><div class="player-inner">
+<div class="now" id="now">スポットを選択してください</div>
+<div class="controls"><button onclick="prev()">← 前へ</button><button class="play" id="play" onclick="togglePlay()">▶ 再生</button><button onclick="next()">次へ →</button></div>
+<div class="small" id="status">音声ガイド準備完了</div>
+</div></div>
+<script>
+const sections=[
+["コロッセオ",[
+["01","まずコロッセオを見上げる","ここで一度立ち止まって、コロッセオを見上げてみてください。私たちが見ているのは、約二千年前に建てられた、古代ローマ最大級の娯楽施設です。巨大な楕円形の建物には、何万人もの観客が入り、剣闘士の試合や猛獣を使ったスペクタクルが行われました。外壁を見れば、同じようなアーチが何段にも連なっています。これは美しい装飾であると同時に、巨大な建物を軽く、そして強くするためのローマ建築の知恵でもありました。まずは建物全体の大きさを、ゆっくり感じてみてください。"],
+["02","なぜ、誰が造ったのか","コロッセオの建設が始まったのは、西暦七十二年ごろ。皇帝ウェスパシアヌスの時代です。完成させたのは息子のティトゥスでした。ここには政治的な意味もありました。皇帝ネロが自分の宮殿のために使っていた土地の一部を、民衆のための巨大な娯楽施設として開放したのです。つまりコロッセオは、単なるスタジアムではありません。新しい皇帝が「この場所をローマ市民に返した」という政治的メッセージでもありました。"],
+["03","観客席に隠された身分制度","古代ローマでは、座席は自由席ではありませんでした。観客は社会的な身分に応じて、座る場所が細かく分けられていました。皇帝や元老院議員などの重要人物はアリーナに近い場所へ。一般市民はその上。女性や社会的地位の低い人々は、さらに上の席へと配置されました。つまり、この建物そのものがローマ社会の縮図だったのです。もし今、観客席を見渡せる場所にいるなら、「誰がどこに座っていたのか」を想像しながら見てみてください。"],
+["04","剣闘士は本当に戦った？","映画では、剣闘士というと最後まで殺し合う戦士の姿が描かれます。しかし実際には、試合にはさまざまな種類がありました。剣闘士は専門的な訓練を受け、武器や防具の組み合わせによって異なるタイプに分けられていました。人気のある剣闘士は、現代のスポーツ選手のように有名人になることもありました。ただし、これは安全なスポーツだったという意味ではありません。戦いは本物で、重傷や死につながることもありました。"],
+["05","猛獣とスペクタクル","コロッセオでは、人間同士の戦いだけでなく、動物を使ったショーも行われました。北アフリカや中東など、帝国各地からライオン、ヒョウ、熊、象などが運ばれてきました。ローマ市民にとって、遠い土地の珍しい動物を見ること自体が巨大な見世物だったのです。その一方で、このようなイベントは帝国の広大さを示す政治的な意味も持っていました。コロッセオは、ローマ帝国そのものを舞台にした劇場だった、と考えることもできます。"],
+["06","地下には何があった？","もし地下部分を見られる場所にいるなら、ここは特に注目してください。アリーナの下には、ハイポジウムと呼ばれる複雑な地下施設がありました。そこには動物の檻、剣闘士の待機場所、そして舞台装置がありました。リフトのような仕組みを使って、動物や人を突然アリーナへ登場させることもできました。つまり観客が見ていた華やかなショーの裏側には、巨大な舞台裏が隠されていたのです。"],
+["07","ローマ建築の秘密","コロッセオの巨大さを支えているのが、アーチです。石やコンクリートの重量を一か所に集中させず、柱へ分散させることで、大きな空間を作ることができました。さらに内部には通路と階段が巧みに配置され、非常に多くの人を短時間で座席へ誘導できました。現代のスタジアムにも通じる発想です。約二千年前の建築家たちが、人の流れまで計算していたことに驚かされます。"],
+["08","「パンとサーカス」の世界","古代ローマの政治を語るとき、「パンとサーカス」という言葉がよく使われます。食料を与え、巨大な娯楽を提供することで、皇帝は民衆の支持を得ようとしました。もちろんローマ社会はそれだけで説明できませんが、コロッセオが政治と娯楽の結びつきを象徴する場所だったことは確かです。ここで行われたショーは、単なる暇つぶしではなく、皇帝と市民の関係を演出する場でもありました。"],
+["09","なぜ今の姿になったのか","コロッセオは古代が終わると、すぐに現在のような遺跡になったわけではありません。長い年月の中で、地震による被害を受け、建材が別の建物に再利用されることもありました。中世には住居や工房など、さまざまな用途に使われた時期もあります。つまり、私たちが見る現在の姿は「古代ローマそのもの」ではなく、二千年近い歴史の結果なのです。欠けた部分も含めて、この建物の歴史だと思って眺めてみてください。"],
+["10","最後に見るポイント","最後に、コロッセオをもう一度全体として見てみましょう。アーチ、観客席、アリーナ、地下施設。その一つ一つが、巨大な都市ローマを動かしていた仕組みの一部でした。ここで一番想像してほしいのは、静かな遺跡ではなく、何万人もの人々が歓声を上げていた瞬間です。二千年前、この場所は世界でも有数の巨大エンターテインメント施設でした。その声や熱気を想像すると、目の前の石が少し違って見えてくるはずです。"]
+]],
+["フォロ・ロマーノ",[
+["11","フォロ・ロマーノ全景","ここは古代ローマの政治、宗教、商業の中心でした。現在は柱や石の遺跡が並んでいますが、古代には神殿、行政施設、裁判所、商店、記念碑などが密集する巨大な都市空間でした。コロッセオが「見る場所」だったとすれば、フォロ・ロマーノはローマが「動いていた場所」です。ここを歩くときは、一つの建物だけを見るのではなく、周囲すべてを一つの都市として想像してみてください。"],
+["12","サトゥルヌス神殿","目の前の特徴的な柱は、サトゥルヌス神殿のものです。サトゥルヌスは農耕と関連する神で、ローマの古い宗教の一部でした。神殿は宗教施設であるだけでなく、国家の財政とも深く関わっていました。ここには国庫が置かれた時期もあります。つまり、この場所では神々への信仰と、ローマ国家のお金が同じ空間で結びついていたのです。"],
+["13","セプティミウス・セウェルスの凱旋門","この凱旋門は、皇帝セプティミウス・セウェルスの軍事的勝利を記念して建てられました。凱旋門は単なる記念碑ではありません。皇帝の功績を都市の中心で繰り返し見せる、巨大な政治広告でもありました。門を通り抜ける人々は、そこに刻まれた勝利の物語を毎日のように目にしたのです。古代ローマでは、街そのものが歴史を語るメディアでした。"],
+["14","元老院（クーリア）","ここはローマの政治を象徴する場所です。元老院では、国家の重要な問題について議論が行われました。もちろん、現代の議会と同じものではありません。権力を持つ人々は限られていました。それでも、ローマが巨大な帝国へ成長していく過程で、この周辺で政治的な決定が積み重ねられていったことを想像すると、この遺跡の意味が見えてきます。"],
+["15","ウェスタの巫女たち","ここには、家庭の炉を守る女神ウェスタに仕えた巫女たちが暮らしていました。ウェスタの巫女は国家にとって特別な存在で、神聖な火を守る役割を担いました。彼女たちには高い社会的地位が与えられ、一般の女性とは異なる権利も持っていました。ローマでは宗教が国家そのものと結びついていたため、この小さな施設も国家の安全と繁栄に関わる重要な場所だったのです。"]
+]],
+["パラティーノの丘",[
+["16","ローマ建国神話の場所","パラティーノの丘は、ローマ建国神話と深く結びついています。伝説では、双子のロムルスとレムスがこの地域で育ち、最終的にロムルスがローマを建国したとされます。歴史的事実と神話は別ですが、この丘が古代ローマ人にとって「自分たちの始まりの場所」だったことは重要です。ここから、ローマの物語が始まったと想像してみてください。"],
+["17","皇帝たちの宮殿","パラティーノの丘には、後の皇帝たちの巨大な宮殿が建てられました。「パラティーノ」という名前は、英語のpalace、つまり宮殿という言葉の語源にもつながっています。皇帝の住居は単なる家ではありません。政治、儀式、警備、接客などを含む巨大な権力の中心でした。丘の上からフォロ・ロマーノを見下ろすと、皇帝がどれほど都市を支配する位置にいたのかがよく分かります。"],
+["18","ドムス・フラウィア","この広大な宮殿群は、フラウィウス朝の皇帝たちの時代に整備されました。巨大な中庭、公式の広間、庭園などが組み合わされ、皇帝の私生活と公的な権力が一体になっていました。今は壁や床の一部しか残っていませんが、ここを歩くときは、白い大理石、色鮮やかな壁、噴水、庭園があった姿を想像してみてください。"],
+["19","丘の上から見るローマ","ここで一度、音声を止めて周囲を見てみましょう。コロッセオ、フォロ・ロマーノ、そして現代のローマ。そのすべてが同じ視界に入ります。古代ローマの中心がどれほど狭い地域に集中していたのかも分かります。二千年の歴史が重なった景色です。写真を撮るだけでなく、数秒間スマートフォンを下ろして、実際の景色を眺めてみてください。"],
+["20","最後に、2000年前を想像する","この旅の最後に、目の前の遺跡を「壊れた建物」としてではなく、「かつて使われていた建物」として見てみましょう。人々はここで働き、祈り、政治を行い、買い物をし、皇帝を見上げていました。石は静かですが、その場所には何世代もの人々の生活が積み重なっています。今日見たコロッセオとフォロ・ロマーノを、写真だけではなく、そこで暮らした人々の姿と一緒に記憶して帰ってください。"]
+]]
+];
+
+let flat=[], current=0, speaking=false;
+sections.forEach(s=>{flat.push({section:s[0],items:s[1]});});
+
+const content=document.getElementById('content');
+flat.forEach(group=>{
+  const title=document.createElement('div'); title.className='section-title'; title.textContent=group.section; content.appendChild(title);
+  const grid=document.createElement('div'); grid.className='grid';
+  group.items.forEach((x)=>{
+    const idx=flatIndex(group.section,x[0]);
+    const b=document.createElement('button'); b.className='card'; b.dataset.idx=idx;
+    b.innerHTML=`<div class="num">${x[0]}</div><div class="title">${x[1]}</div><div class="time">約1〜2分　タップして再生</div>`;
+    b.onclick=()=>select(idx,true); grid.appendChild(b);
+  });
+  content.appendChild(grid);
+});
+function flatIndex(section,num){
+  let n=0;
+  for(const g of flat){for(const x of g.items){if(g.section===section&&x[0]===num)return n;n++;}}
+}
+function getItem(i){let n=0;for(const g of flat)for(const x of g.items){if(n++===i)return {...x,section:g.section};}}
+function select(i,scroll=false){current=i; const x=getItem(i); document.querySelectorAll('.card').forEach(b=>b.classList.toggle('active',+b.dataset.idx===i)); document.getElementById('now').textContent=`${x[0]}　${x[1]}`; document.getElementById('status').textContent=x.section; document.getElementById('play').textContent='▶ 再生'; speaking=false; if(scroll) document.querySelector(`.card[data-idx="${i}"]`).scrollIntoView({behavior:'smooth',block:'center'});}
+function speak(){
+ if(!('speechSynthesis' in window)){alert('このブラウザでは音声読み上げが利用できません。');return;}
+ speechSynthesis.cancel(); const x=getItem(current); const u=new SpeechSynthesisUtterance(x[2]); u.lang='ja-JP'; u.rate=parseFloat(document.getElementById('rate').value);
+ u.onstart=()=>{speaking=true;document.getElementById('play').textContent='⏸ 一時停止';document.getElementById('status').textContent='再生中';};
+ u.onend=()=>{speaking=false;document.getElementById('play').textContent='▶ 再生';document.getElementById('status').textContent='再生終了';};
+ speechSynthesis.speak(u);
+}
+function togglePlay(){if(!speaking){speak();}else{if(speechSynthesis.paused){speechSynthesis.resume();document.getElementById('play').textContent='⏸ 一時停止';}else{speechSynthesis.pause();document.getElementById('play').textContent='▶ 再開';}}}
+function prev(){select(Math.max(0,current-1),true);}
+function next(){select(Math.min(flat.reduce((a,g)=>a+g.items.length,0)-1,current+1),true);}
+select(0,false);
+
+let deferredPrompt;
+const installBtn=document.getElementById('installBtn');
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault(); deferredPrompt=e; installBtn.style.display='block';
+});
+installBtn.addEventListener('click',async()=>{
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt=null; installBtn.style.display='none';
+});
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
